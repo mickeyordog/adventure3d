@@ -51,16 +51,23 @@ public class VehicleMovement : MonoBehaviour
     public float forwardSpeed = 5f;
     public float turnSpeed = 5f;
     private Rigidbody rb;
+    private float currentSpeed;
+    [SerializeField] private float acceleration = 1f;
+    [SerializeField] private float decelerationMultiplier = 3f;
 
     private void Awake()
     {
+        Application.targetFrameRate = -1;
         rb = GetComponent<Rigidbody>();
     }
 
     private void FixedUpdate()
     {
-        rb.velocity = transform.forward * Input.GetAxis("Vertical") * forwardSpeed;
-        rb.AddRelativeTorque(transform.up * Input.GetAxis("Horizontal") * turnSpeed);
+        transform.Rotate(0f, Input.GetAxis("Horizontal") * turnSpeed * Time.fixedDeltaTime, 0f);
+        float vert = Input.GetAxisRaw("Vertical");
+        currentSpeed = Mathf.Lerp(currentSpeed, Input.GetAxisRaw("Vertical"), acceleration * Time.fixedDeltaTime * (vert == 0 ? decelerationMultiplier : 1f));
+        rb.velocity = transform.forward * forwardSpeed * currentSpeed;
+        //rb.velocity = forwardSpeed * Input.GetAxis("Vertical") * transform.forward;
     }
 }
 
